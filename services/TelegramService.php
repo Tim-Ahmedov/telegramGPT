@@ -35,9 +35,19 @@ class TelegramService
         if ($replyToMessageId) {
             $params['reply_to_message_id'] = $replyToMessageId;
         }
-        $response = $this->client->post('sendMessage', [
-            'form_params' => $params,
-        ]);
-        return json_decode($response->getBody(), true);
+        try {
+            $response = $this->client->post('sendMessage', [
+                'form_params' => $params,
+            ]);
+            $body = (string)$response->getBody();
+            $result = json_decode($body, true);
+            if (!$result['ok']) {
+                error_log('Telegram sendMessage error: ' . $body);
+            }
+            return $result;
+        } catch (\Exception $e) {
+            error_log('Telegram sendMessage exception: ' . $e->getMessage());
+            return ['ok' => false, 'error' => $e->getMessage()];
+        }
     }
 } 
