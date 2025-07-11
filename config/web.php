@@ -46,7 +46,7 @@ $config = [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
             'rules' => [
-                'POST site/telegram-webhook' => 'site/telegram-webhook',
+                'POST telegram/webhook' => 'telegram/webhook',
             ],
         ],
     ],

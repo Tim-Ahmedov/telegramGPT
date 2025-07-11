@@ -9,6 +9,8 @@ use yii\web\Response;
 use yii\filters\VerbFilter;
 use app\models\LoginForm;
 use app\models\ContactForm;
+use app\services\TelegramService;
+use app\services\OpenAIService;
 
 class SiteController extends Controller
 {
@@ -134,27 +136,27 @@ class SiteController extends Controller
         Yii::$app->response->format = Response::FORMAT_JSON;
         $input = Yii::$app->request->getRawBody();
         $update = json_decode($input, true);
-        
+
         $botToken = Yii::$app->params['telegramBotToken'];
         $openAiKey = Yii::$app->params['openAiApiKey'];
         if (!$botToken || !$openAiKey) {
             return ['ok' => false, 'error' => 'Bot token or OpenAI key not set'];
         }
 
-        // Проверяем, что это сообщение с упоминанием бота
+        $telegram = new TelegramService($botToken);
+        $openai = new OpenAIService($openAiKey);
+
         $message = $update['message'] ?? null;
         if (!$message) {
-            return ['ok' => true]; // Игнорируем не-сообщения
+            return ['ok' => true];
         }
         $entities = $message['entities'] ?? [];
         $isMentioned = false;
+        $botInfo = $telegram->getMe();
+        $botUsername = $botInfo['result']['username'] ?? null;
         foreach ($entities as $entity) {
             if ($entity['type'] === 'mention') {
                 $mentionText = mb_substr($message['text'], $entity['offset'], $entity['length']);
-                // Получаем username бота через Bot API
-                $botInfo = @file_get_contents("https://api.telegram.org/bot{$botToken}/getMe");
-                $botInfo = $botInfo ? json_decode($botInfo, true) : null;
-                $botUsername = $botInfo['result']['username'] ?? null;
                 if ($botUsername && $mentionText === '@' . $botUsername) {
                     $isMentioned = true;
                     break;
@@ -162,34 +164,13 @@ class SiteController extends Controller
             }
         }
         if (!$isMentioned) {
-            return ['ok' => true]; // Игнорируем сообщения без упоминания
+            return ['ok' => true];
         }
 
-        // Отправляем текст в OpenAI
         $userText = $message['text'];
-        $openai = \OpenAI::client($openAiKey);
-        $response = $openai->chat()->create([
-            'model' => 'gpt-3.5-turbo',
-            'messages' => [
-                ['role' => 'user', 'content' => $userText],
-            ],
-        ]);
-        $reply = $response['choices'][0]['message']['content'] ?? 'Ошибка генерации ответа.';
-
-        // Отправляем ответ в Telegram
+        $reply = $openai->ask($userText);
         $chatId = $message['chat']['id'];
-        $replyData = [
-            'chat_id' => $chatId,
-            'text' => $reply,
-            'reply_to_message_id' => $message['message_id'],
-        ];
-        $ch = curl_init("https://api.telegram.org/bot{$botToken}/sendMessage");
-        curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($replyData));
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_exec($ch);
-        curl_close($ch);
-
+        $telegram->sendMessage($chatId, $reply, $message['message_id']);
         return ['ok' => true];
     }
 }
