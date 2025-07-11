@@ -23,6 +23,10 @@ class TelegramController extends Controller
 
         $botToken = Yii::$app->params['telegramBotToken'];
         $openAiKey = Yii::$app->params['openAiApiKey'];
+        error_log('DEBUG: params.telegramBotToken=' . var_export($botToken, true));
+        error_log('DEBUG: params.openAiApiKey=' . var_export($openAiKey, true));
+        error_log('DEBUG: getenv(TELEGRAM_BOT_TOKEN)=' . var_export(getenv('TELEGRAM_BOT_TOKEN'), true));
+        error_log('DEBUG: getenv(OPENAI_API_KEY)=' . var_export(getenv('OPENAI_API_KEY'), true));
         if (!$botToken || !$openAiKey) {
             return ['ok' => false, 'error' => 'Bot token or OpenAI key not set'];
         }
