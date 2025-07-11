@@ -10,6 +10,9 @@ require __DIR__ . '/../vendor/autoload.php';
 if (file_exists(__DIR__ . '/../.env')) {
     $dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../');
     $dotenv->load();
+} else {
+    echo "Error: .env file not found";
+    exit;
 }
 
 require __DIR__ . '/../vendor/yiisoft/yii2/Yii.php';
