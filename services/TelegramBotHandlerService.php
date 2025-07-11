@@ -38,6 +38,14 @@ class TelegramBotHandlerService
             return ['ok' => true];
         }
         $userText = $message['text'];
+        // Если это reply, добавляем текст исходного сообщения в prompt
+        if (isset($message['reply_to_message'])) {
+            $replyTo = $message['reply_to_message'];
+            $originalText = $replyTo['text'] ?? '';
+            if ($originalText) {
+                $userText = "Ответ на: " . $originalText . "\n" . $userText;
+            }
+        }
         $reply = $this->openai->ask($userText);
         $chatId = $message['chat']['id'];
         $this->telegram->sendMessage($chatId, $reply, $message['message_id']);
