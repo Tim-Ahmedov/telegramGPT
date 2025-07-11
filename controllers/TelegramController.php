@@ -15,6 +15,8 @@ class TelegramController extends Controller
 
     public function actionWebhook()
     {
+        error_log('TOKEN=' . Yii::$app->params['telegramBotToken']);
+        error_log('OPENAI=' . Yii::$app->params['openAiApiKey']);
         Yii::$app->response->format = Response::FORMAT_JSON;
         $input = Yii::$app->request->getRawBody();
         $update = json_decode($input, true);
