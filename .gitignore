@@ -1,0 +1,34 @@
+# Composer
+/vendor/
+/composer.lock
+
+# Yii runtime & assets
+/runtime/
+/web/assets/
+
+# dotenv
+.env
+
+# IDE
+.idea/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+/.docker/
+
+# Logs
+*.log
+
+# PHPUnit
+.phpunit.result.cache
+
+# Node
+/node_modules/
+
+# Other
+*.swp
+*.swo
