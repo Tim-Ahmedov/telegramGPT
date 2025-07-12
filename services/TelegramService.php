@@ -31,6 +31,7 @@ class TelegramService
         $params = [
             'chat_id' => $chatId,
             'text' => $text,
+            'parse_mode' => 'MarkdownV2',
         ];
         if ($replyToMessageId) {
             $params['reply_to_message_id'] = $replyToMessageId;
