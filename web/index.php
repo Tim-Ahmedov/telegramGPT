@@ -6,15 +6,6 @@ defined('YII_ENV') or define('YII_ENV', 'dev');
 
 require __DIR__ . '/../vendor/autoload.php';
 
-// Загрузка .env
-if (file_exists(__DIR__ . '/../.env')) {
-    $dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../');
-    $dotenv->load();
-} else {
-    echo "Error: .env file not found";
-    exit;
-}
-
 require __DIR__ . '/../vendor/yiisoft/yii2/Yii.php';
 
 $config = require __DIR__ . '/../config/web.php';

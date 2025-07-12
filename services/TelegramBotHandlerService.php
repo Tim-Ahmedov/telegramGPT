@@ -25,6 +25,7 @@ class TelegramBotHandlerService
         $isMentioned = false;
         $botInfo = $this->telegram->getMe();
         $botUsername = $botInfo['result']['username'] ?? null;
+        $myBotId = 7512768996; // ваш bot ID
         foreach ($entities as $entity) {
             if ($entity['type'] === 'mention') {
                 $mentionText = mb_substr($message['text'], $entity['offset'], $entity['length']);
@@ -34,7 +35,14 @@ class TelegramBotHandlerService
                 }
             }
         }
-        if (!$isMentioned) {
+        // Новая логика: если это reply на сообщение бота, тоже отвечаем
+        $isReplyToMe = false;
+        if (isset($message['reply_to_message']['from']['id'])) {
+            if ($message['reply_to_message']['from']['id'] == $myBotId) {
+                $isReplyToMe = true;
+            }
+        }
+        if (!$isMentioned && !$isReplyToMe) {
             return ['ok' => true];
         }
         $userText = $message['text'];
